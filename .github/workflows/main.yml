@@ -1,17 +1,21 @@
 name: Update Coffee Price
 on:
   schedule:
-    - cron: '0 * * * *' # Chạy vào phút thứ 0 của mỗi giờ
+    - cron: '0 * * * *'
   workflow_dispatch: 
+
+permissions:
+  contents: write # QUAN TRỌNG: Cấp quyền ghi cho action
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4 # Nâng cấp lên v4
       - name: Set up Python
-        uses: actions/setup-python@v4
-        with: {python-version: '3.9'}
+        uses: actions/setup-python@v5 # Nâng cấp lên v5
+        with:
+          python-version: '3.12'
       - name: Install dependencies
         run: pip install requests beautifulsoup4
       - name: Run script
@@ -21,5 +25,5 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add data.json
-          git commit -m "Update coffee price"
+          git commit -m "Update coffee price" || exit 0 # Thêm || exit 0 để tránh lỗi nếu không có thay đổi
           git push
