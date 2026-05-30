@@ -1,22 +1,17 @@
 name: Update Coffee Price
 on:
-  workflow_dispatch: # Cho phép nhấn nút chạy tay ở tab Actions
+  workflow_dispatch:
   schedule:
     - cron: '0 * * * *'
 
 permissions:
-  contents: write # Cấp quyền ghi
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }} # Dòng này cực kỳ quan trọng
+      - uses: actions/checkout@v4
       
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -33,6 +28,12 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          # Thêm file vào staging
           git add data.json
-          # Kiểm tra xem có file nào thay đổi không trước khi commit
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update coffee price" && git push)
+          # Kiểm tra xem có thay đổi không
+          if ! git diff --cached --quiet; then
+            git commit -m "Update coffee price"
+            git push
+          else
+            echo "Không có dữ liệu mới để cập nhật."
+          fi
