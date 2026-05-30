@@ -1,43 +1,30 @@
 import requests
-from bs4 import BeautifulSoup
 import json
-import sys
 
 def fetch_data():
-    url = "https://giacaphe.com/gia-ca-phe-truc-tuyen/"
+    # URL này bạn lấy từ tab Network khi nhấn vào request có tên giống như 'truc-tuyen'
+    # URL dự đoán từ code của bạn:
+    url = "https://giacaphe.com/wp-json/gia-ca-phe/v1/truc-tuyen/" 
+    
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "X-Requested-With": "XMLHttpRequest",
+        "X-Auth-Site": "giacaphe",  # BẮT BUỘC PHẢI CÓ DÒNG NÀY
+        "Referer": "https://giacaphe.com/gia-ca-phe-truc-tuyen/"
     }
     
     try:
-        response = requests.get(url, headers=headers, timeout=20)
-        soup = BeautifulSoup(response.content, 'html.parser')
+        response = requests.get(url, headers=headers, timeout=15)
+        response.raise_for_status() # Kiểm tra lỗi HTTP
+        data = response.json()
         
-        # Thay vì tìm theo id="robusta", ta tìm theo thuộc tính data-exchange
-        table = soup.find('table', {'data-exchange': 'coffee_liffe'})
-        
-        if not table:
-            # Nếu vẫn không thấy, in ra tất cả các bảng có data-exchange để debug
-            print("Không thấy bảng với data-exchange='coffee_liffe'.")
-            print("Các bảng tìm thấy:")
-            for t in soup.find_all('table'):
-                print(f"Bảng: {t.get('data-exchange')}, id: {t.get('id')}")
-            sys.exit(1)
-            
-        all_data = []
-        rows = table.find_all('tr', {'data-prev': True})
-        
-        for row in rows:
-            raw_json = row.get('data-prev')
-            all_data.append(json.loads(raw_json))
-            
+        # Lưu toàn bộ dữ liệu (bạn có thể lọc theo key sau)
         with open('data.json', 'w', encoding='utf-8') as f:
-            json.dump(all_data, f, ensure_ascii=False, indent=4)
-        print("Thành công! Đã ghi file data.json.")
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        print("Đã lấy dữ liệu thành công!")
             
     except Exception as e:
-        print(f"Lỗi: {e}")
-        sys.exit(1)
+        print(f"Lỗi kết nối: {e}")
 
 if __name__ == "__main__":
     fetch_data()
