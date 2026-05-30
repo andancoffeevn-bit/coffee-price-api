@@ -1,21 +1,13 @@
 name: Update Coffee Price
 
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
   schedule:
-    # Cấu hình chạy mỗi 20 phút (ví dụ: phút 0, 20, 40 của mỗi giờ)
     - cron: '*/20 * * * *'
-
-permissions:
-  contents: write
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -23,18 +15,8 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests firebase-admin
       - name: Run script
+        env:
+          FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
         run: python get_price.py
-      - name: Commit and Push
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          # Kiểm tra xem có file data.json thay đổi không trước khi commit
-          if [ -n "$(git status --porcelain data.json)" ]; then
-            git add data.json
-            git commit -m "Update coffee price: $(date +'%Y-%m-%d %H:%M:%S')"
-            git push
-          else
-            echo "No changes to commit"
-          fi
