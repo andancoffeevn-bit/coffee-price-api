@@ -1,3 +1,13 @@
+name: Update Coffee Price
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,10 +27,6 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          if [ -f data.json ]; then
-            git add data.json
-            git commit -m "Update coffee price" || echo "Không có thay đổi"
-            git push
-          else
-            echo "File data.json không tồn tại, bỏ qua push."
-          fi
+          git add data.json
+          git commit -m "Update coffee price" || echo "No changes to commit"
+          git push
