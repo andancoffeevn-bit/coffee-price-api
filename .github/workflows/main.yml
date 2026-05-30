@@ -1,0 +1,25 @@
+name: Update Coffee Price
+on:
+  schedule:
+    - cron: '0 * * * *' # Chạy vào phút thứ 0 của mỗi giờ
+  workflow_dispatch: 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with: {python-version: '3.9'}
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+      - name: Run script
+        run: python get_price.py
+      - name: Commit files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data.json
+          git commit -m "Update coffee price"
+          git push
