@@ -1,39 +1,26 @@
-name: Update Coffee Price
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 * * * *'
-
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
-      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          
       - name: Install dependencies
         run: pip install requests beautifulsoup4
-        
       - name: Run script
         run: python get_price.py
-        
       - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          # Thêm file vào staging
-          git add data.json
-          # Kiểm tra xem có thay đổi không
-          if ! git diff --cached --quiet; then
-            git commit -m "Update coffee price"
+          if [ -f data.json ]; then
+            git add data.json
+            git commit -m "Update coffee price" || echo "Không có thay đổi"
             git push
           else
-            echo "Không có dữ liệu mới để cập nhật."
+            echo "File data.json không tồn tại, bỏ qua push."
           fi
